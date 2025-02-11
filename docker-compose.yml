@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14
+    container_name: postgres
+    environment:
+      POSTGRES_DB: stocks_db
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+    ports:
+      - "5433:5432"
+
+  stock-fetcher:
+    build: .
+    container_name: stock_project-stock-fetcher
+    depends_on:
+      - postgres
+
+  airflow:
+    image: apache/airflow:2.7.0
+    container_name: airflow
+    restart: always
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__WEBSERVER__RBAC=True
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://myuser:mypassword@postgres:5432/stocks_db
+      - AIRFLOW__CORE__FERNET_KEY="-Fn3HvQ1wYSJu3njJ2zoD3GhWM9zGxspzb6jVTVJiMI="
+      - AIRFLOW__WEBSERVER__DEFAULT_USER_ROLE=Admin
+      - _AIRFLOW_WWW_USER_USERNAME=admin
+      - _AIRFLOW_WWW_USER_PASSWORD=admin
+      - _AIRFLOW_WWW_USER_EMAIL=admin@example.com
+      - _AIRFLOW_WWW_USER_FIRSTNAME=Admin
+      - _AIRFLOW_WWW_USER_LASTNAME=User
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./airflow/plugins:/opt/airflow/plugins
+      - ./scripts/entrypoint.sh:/entrypoint.sh
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    entrypoint: ["/bin/bash", "/entrypoint.sh"]
+
+  airflow-scheduler:
+    image: apache/airflow:2.7.0
+    container_name: airflow-scheduler
+    restart: always
+    depends_on:
+      - postgres
+      - airflow
+    command: scheduler
+    environment:
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://myuser:mypassword@postgres:5432/stocks_db
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./airflow/plugins:/opt/airflow/plugins
+  dashboard:
+    build: .
+    container_name: stock_dashboard
+    restart: always
+    depends_on:
+      - postgres
+    ports:
+      - "5050:5000"
+    command: ["python", "dashboard.py"]

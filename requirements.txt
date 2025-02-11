@@ -1,0 +1,34 @@
+# API Requests & Data Handling
+requests
+pandas
+python-dotenv  # For managing API keys securely
+
+# PostgreSQL Database Connection
+psycopg2-binary
+sqlalchemy  # Optional: For ORM-based interactions
+
+# Airflow (For Scheduling)
+apache-airflow  # Make sure your Docker image supports this
+
+# dbt (For Transformations)
+dbt-core
+dbt-postgres  # PostgreSQL adapter for dbt
+
+# Spark (For Distributed Data Processing)
+pyspark  # If using Apache Spark for transformations
+
+# Dash (For Data Visualization)
+dash
+plotly
+
+# Flask (For Web API Backend)
+flask
+
+# Gunicorn (For Hosting the Flask API in Production)
+gunicorn
+flask
+pandas
+plotly
+psycopg2
+yfinance
+numpy
