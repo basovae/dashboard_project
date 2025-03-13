@@ -1,26 +1,40 @@
 version: '3.8'
 
+
+networks:
+  stock_network:
+
+
 services:
   postgres:
     image: postgres:14
     container_name: postgres
+    networks:
+      - stock_network
     environment:
       POSTGRES_DB: stocks_db
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
     ports:
       - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   stock-fetcher:
     build: .
     container_name: stock_project-stock-fetcher
+    networks:
+      - stock_network
     depends_on:
       - postgres
+    command: tail -f /dev/null
 
   airflow:
     image: apache/airflow:2.7.0
     container_name: airflow
     restart: always
+    networks:
+      - stock_network
     environment:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__WEBSERVER__RBAC=True
@@ -37,6 +51,7 @@ services:
       - ./airflow/logs:/opt/airflow/logs
       - ./airflow/plugins:/opt/airflow/plugins
       - ./scripts/entrypoint.sh:/entrypoint.sh
+      - /var/run/docker.sock:/var/run/docker.sock  
     ports:
       - "8080:8080"
     depends_on:
@@ -47,6 +62,8 @@ services:
     image: apache/airflow:2.7.0
     container_name: airflow-scheduler
     restart: always
+    networks:
+      - stock_network
     depends_on:
       - postgres
       - airflow
@@ -57,12 +74,22 @@ services:
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
       - ./airflow/plugins:/opt/airflow/plugins
+      
   dashboard:
     build: .
     container_name: stock_dashboard
     restart: always
+    networks:
+      - stock_network
     depends_on:
       - postgres
     ports:
       - "5050:5000"
+    volumes:
+      - ./dashboard.py:/app/dashboard.py
+      - ./templates:/app/templates  # ✅ Ensure the templates folder is inside the container
     command: ["python", "dashboard.py"]
+
+
+volumes:
+  postgres_data:

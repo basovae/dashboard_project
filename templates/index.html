@@ -3,11 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Stock Dashboard</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <title>Stock Trend Analysis</title>
   </head>
   <body>
-    <h1>Stock Price Dashboard</h1>
-    <div>{{ graph_html|safe }}</div>
+    <h1>Stock Trend Analysis & Buy/Sell Recommendations</h1>
+    <div id="chart">{{ graph_html | safe }}</div>
+
+    <h2>Buy/Sell Recommendations</h2>
+    <table border="1">
+      <tr>
+        <th>Symbol</th>
+        <th>Last Close Price</th>
+        <th>Recommendation</th>
+      </tr>
+      {% for symbol in df['symbol'].unique() %}
+      <tr>
+        <td>{{ symbol }}</td>
+        <td>{{ df[df['symbol'] == symbol]['close'].iloc[-1] }}</td>
+        <td
+          style="color: {% if df[df['symbol'] == symbol]['Signal'].iloc[-1] == 'BUY' %}green{% else %}red{% endif %};"
+        >
+          {{ df[df['symbol'] == symbol]['Signal'].iloc[-1] }}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
   </body>
 </html>

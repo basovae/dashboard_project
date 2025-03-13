@@ -1,14 +1,21 @@
-# 1️⃣ Use the official Python image as the base
-FROM python:3.9
+# Use Python image
+FROM python:3.8
 
-# 2️⃣ Set the working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# 3️⃣ Copy project files into the container
-COPY . .
+# Copy all required files into the container
+COPY requirements.txt .
+COPY backfill_stock_data.py .  
+COPY update_stock_data.py .  
 
-# 4️⃣ Install dependencies from requirements.txt
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 5️⃣ Set the default command to run the stock data fetching script
+# Copy the dashboard script and templates
+COPY dashboard.py .  
+COPY templates/index.html .  
+
+
+# Default command (can be overridden)
 CMD ["python", "fetch_stock_data.py"]
