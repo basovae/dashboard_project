@@ -20,7 +20,7 @@ def fetch_stock_data():
         query = """
             SELECT symbol, timestamp, close
             FROM stock_prices
-            WHERE timestamp > NOW() - INTERVAL '7 days'  # ✅ Get the last 7 days of data
+            WHERE timestamp > NOW() - INTERVAL '7 days' 
             ORDER BY timestamp ASC;
         """
         df = pd.read_sql(query, conn)

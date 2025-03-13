@@ -1,9 +1,7 @@
 version: '3.8'
 
-
 networks:
   stock_network:
-
 
 services:
   postgres:
@@ -11,10 +9,12 @@ services:
     container_name: postgres
     networks:
       - stock_network
+    env_file:
+      - .env
     environment:
-      POSTGRES_DB: stocks_db
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5433:5432"
     volumes:
@@ -87,7 +87,7 @@ services:
       - "5050:5000"
     volumes:
       - ./dashboard.py:/app/dashboard.py
-      - ./templates:/app/templates  # ✅ Ensure the templates folder is inside the container
+      - ./templates:/app/templates 
     command: ["python", "dashboard.py"]
 
 
